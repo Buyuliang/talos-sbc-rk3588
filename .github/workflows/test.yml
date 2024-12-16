@@ -2,7 +2,7 @@ name: default
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
-"on":
+on:
   push:
     branches:
       - main
@@ -14,11 +14,10 @@ concurrency:
       - main
       - release-*
 
-
 env:
   PLATFORM: linux/arm64
   INSTALLER_ARCH: targetarch
-  USERNAME: tom
+  USERNAME: ${{ github.repository_owner }}
   TALOS_VERSION: v1.7.4
   REALKTEK_FIRMWARE_EXTENSION_IMAGE: ghcr.io/siderolabs/realtek-firmware:20240513@sha256:4ca40c2836c1cdb5105456186afd880925d72e81ee6b0ff69a40c9c05b7b74a4
 
@@ -30,9 +29,7 @@ jobs:
       issues: read
       packages: write
       pull-requests: read
-    runs-on:
-      - self-hosted
-      - pkgs
+    runs-on: ubuntu-latest  # 这里改为 GitHub 提供的托管 runner
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
       SBC_RK3588_TAG: ${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
@@ -128,7 +125,7 @@ jobs:
       packages: write
     needs: [sbc-rk3588]
     if: startsWith(github.ref, 'refs/tags/')
-    runs-on: [self-hosted]
+    runs-on: ubuntu-latest  # 这里改为 GitHub 提供的托管 runner
     strategy:
       matrix:
         kernel:
@@ -185,25 +182,5 @@ jobs:
 
       - name: Cleanup
         if: always()
-        continue-on-error: true
         run: |
-          crane auth logout ghcr.io
-          # HACK: files are owned by root, (ab)use Docker as sudo
-          docker run --rm -t -v ./_out:/out alpine sh -c 'rm -rf /out/*'
-
-  release:
-    needs: [boards]
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-
-      - name: Release
-        uses: crazy-max/ghaction-github-release@v2
-        with:
-          files: |
-            talos-*.raw.xz
+          rm -rf _out
