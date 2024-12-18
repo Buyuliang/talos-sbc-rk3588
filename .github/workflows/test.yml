@@ -41,9 +41,12 @@ jobs:
     steps:
       - name: build env install
         run: |
-          sudo apt-add-repository ppa:tsuru/ppa
           sudo apt-get update
-          sudo apt-get install -y qemu qemu-user-static qemu-system crane
+          sudo apt-get install -y qemu qemu-user-static qemu-system
+          wget https://github.com/google/go-containerregistry/releases/download/v0.19.1/go-containerregistry_Linux_x86_64.tar.gz
+          tar -xvf go-containerregistry_Linux_x86_64.tar.gz
+          sudo chmod a+x crane
+          sudo cp crane /usr/local/bin
           docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Build installer image
         if: github.event_name != 'pull_request'
