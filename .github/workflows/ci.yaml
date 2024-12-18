@@ -192,6 +192,7 @@ jobs:
           docker run --rm -t -v ./_out:/out alpine sh -c 'rm -rf /out/*'
 
   release:
+    runs-on: ubuntu-latest
     needs: [boards]
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
