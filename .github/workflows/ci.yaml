@@ -123,6 +123,7 @@ jobs:
             PUSH=true
 
   boards:
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
