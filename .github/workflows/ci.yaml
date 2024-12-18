@@ -31,7 +31,7 @@ jobs:
       packages: write
       pull-requests: read
     runs-on:
-      - self-hosted
+      - ubuntu-latest
       - pkgs
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
@@ -40,7 +40,6 @@ jobs:
       matrix:
         kernel:
           - bsp
-          - mainline
     env:
       KERNEL_VARIANT: ${{ matrix.kernel }}
     steps:
@@ -129,15 +128,11 @@ jobs:
       packages: write
     needs: [sbc-rk3588]
     if: startsWith(github.ref, 'refs/tags/')
-    runs-on: [self-hosted]
     strategy:
       matrix:
         kernel:
           - bsp
-          - mainline
         board:
-          - name: rock-5a
-            chipset: rk3588s
           - name: rock-5b
             chipset: rk3588
     env:
@@ -197,7 +192,6 @@ jobs:
 
   release:
     needs: [boards]
-    runs-on: [self-hosted]
     if: startsWith(github.ref, 'refs/tags/')
     permissions:
       contents: write
