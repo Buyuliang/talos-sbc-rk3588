@@ -51,10 +51,9 @@ jobs:
             installer --arch arm64 \
               --base-installer-image="ghcr.io/siderolabs/installer:${{ env.TALOS_VERSION }}" \
               --overlay-name=rk3588 \
-              --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588:${{ env.SBC_RK3588_TAG }} \
+              --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588-bsp:${{ env.SBC_RK3588_TAG }} \
               --overlay-option="board=${{ matrix.board.name }}" \
-              --overlay-option="chipset=${{ matrix.board.chipset }}" \
-              --system-extension-image="${{ env.REALKTEK_FIRMWARE_EXTENSION_IMAGE }}"
+              --overlay-option="chipset=${{ matrix.board.chipset }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SBC_RK3588_TAG: v1.0-2-g887279e
