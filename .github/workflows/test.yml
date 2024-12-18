@@ -39,6 +39,11 @@ jobs:
     env:
       SBC_RK3588_TAG: ${{ needs.sbc-rk3588.outputs.SBC_RK3588_TAG }}
     steps:
+      - name: build env install
+        run: |
+          sudo apt update
+          sudo apt install qemu qemu-user-static qemu-system qemu-arch-extra
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
       - name: Build installer image
         if: github.event_name != 'pull_request'
         run: |
