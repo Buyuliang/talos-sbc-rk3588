@@ -37,7 +37,7 @@ jobs:
           - name: rock-5b
             chipset: rk3588
     env:
-      SBC_RK3588_TAG: ${{ needs.sbc-rk3588.outputs.SBC_RK3588_TAG }}
+      SBC_RK3588_TAG: rk3588
     steps:
       - name: build env install
         run: |
@@ -71,7 +71,7 @@ jobs:
       - name: Build flashable image
         if: startsWith(github.ref, 'refs/tags/')
         run: |
-          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
+          docker run --rm -t --platform linux/arm64 -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
           metal --arch arm64 \
             --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588-${{ matrix.kernel }}:${{ env.SBC_RK3588_TAG }} \
             --overlay-name=rk3588 \
