@@ -2,7 +2,7 @@ name: default
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
-"on":
+on:
   push:
     branches:
       - main
@@ -13,7 +13,6 @@ concurrency:
     branches:
       - main
       - release-*
-
 
 env:
   PLATFORM: linux/arm64
@@ -30,8 +29,7 @@ jobs:
       issues: read
       packages: write
       pull-requests: read
-    runs-on:
-      - ubuntu-latest
+    runs-on: ubuntu-latest  # 这里改为 GitHub 提供的托管 runner
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
       SBC_RK3588_TAG: ${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
@@ -48,9 +46,7 @@ jobs:
         continue-on-error: true
       - name: print-system-info
         run: |
-          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
           MEMORY_GB=$((${{ steps.system-info.outputs.totalmem }}/1024/1024/1024))
-
           OUTPUTS=(
             "CPU Core: ${{ steps.system-info.outputs.cpu-core }}"
             "CPU Model: ${{ steps.system-info.outputs.cpu-model }}"
@@ -63,17 +59,17 @@ jobs:
             "Release: ${{ steps.system-info.outputs.release }}"
             "Total memory: ${MEMORY_GB} GB"
           )
-
           for OUTPUT in "${OUTPUTS[@]}";do
             echo "${OUTPUT}"
           done
         continue-on-error: true
       - name: Login to registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
-          username: ${{ env.USERNAME }}
+          username: ${{ github.actor }}
       - name: checkout
         uses: actions/checkout@v4
         with:
@@ -81,6 +77,7 @@ jobs:
       - name: Build RK3588 overlay
         id: build-overlay
         run: |
+          docker buildx create --driver docker-container  --driver-opt network=host --name local1 --buildkitd-flags '--allow-insecure-entitlement security.insecure' --use
           make talos-kernel-rk3588-${{ matrix.kernel }} talos-sbc-rk3588-${{ matrix.kernel }}
           echo "SBC_RK3588_TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')" >> "$GITHUB_OUTPUT"
       - name: Push RK3588 overlay to registry
@@ -105,7 +102,6 @@ jobs:
             -print0 \
           | sort -z \
           | xargs -r0 git am --whitespace=fix
-
       - name: Build RK3588 Talos imager
         working-directory: ./talos
         run: |
@@ -113,19 +109,20 @@ jobs:
             PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588-${{ matrix.kernel }}:${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}" \
             TAG=${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
       - name: Push RK3588 Talos imager
+        if: github.event_name != 'pull_request'
         working-directory: ./talos
         run: |
           make imager \
             PKG_KERNEL="ghcr.io/${{ env.USERNAME }}/talos-kernel-rk3588-${{ matrix.kernel }}:${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}" \
             TAG=${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
             PUSH=true
-
   boards:
-    runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
     needs: [sbc-rk3588]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest  # 这里改为 GitHub 提供的托管 runner
     strategy:
       matrix:
         kernel:
@@ -134,7 +131,7 @@ jobs:
           - name: blade3-v101-linux
             chipset: rk3588
     env:
-      SBC_RK3588_TAG: rk3588
+      SBC_RK3588_TAG: ${{ needs.sbc-rk3588.outputs.SBC_RK3588_TAG }}
     steps:
       - name: Build installer image
         if: github.event_name != 'pull_request'
@@ -151,11 +148,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push installer image
+        if: github.event_name != 'pull_request'
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | crane auth login ghcr.io --username "${{ env.USERNAME }}" --password-stdin
           crane push _out/installer-arm64.tar ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}-${{ matrix.kernel }}
-
       - name: Build flashable image
+        if: startsWith(github.ref, 'refs/tags/')
         run: |
           docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
           metal --arch arm64 \
@@ -170,7 +168,6 @@ jobs:
       - name: Prepare flashable image for upload
         run: |
           docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}-${{ matrix.kernel }}.raw.xz
-
       - uses: actions/upload-artifact@v4
         with:
           name: talos-metal-${{ matrix.board.chipset }}-${{ matrix.board.name }}-${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }}
@@ -180,24 +177,5 @@ jobs:
 
       - name: Cleanup
         if: always()
-        continue-on-error: true
         run: |
-          crane auth logout ghcr.io
-          # HACK: files are owned by root, (ab)use Docker as sudo
-          docker run --rm -t -v ./_out:/out alpine sh -c 'rm -rf /out/*'
-
-  release:
-    runs-on: ubuntu-latest
-    needs: [boards]
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          merge-multiple: true
-
-      - name: Release
-        uses: crazy-max/ghaction-github-release@v2
-        with:
-          files: |
-            talos-*.raw.xz
+          rm -rf _out
