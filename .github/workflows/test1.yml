@@ -126,9 +126,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Prepare flashable image for upload
-        run: |
-          docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}-${{ matrix.kernel }}.raw.xz
+#      - name: Prepare flashable image for upload
+#        run: |
+#          docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}-${{ matrix.kernel }}.raw.xz
 
       - uses: actions/upload-artifact@v4
         with:
