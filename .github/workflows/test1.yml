@@ -14,6 +14,7 @@ concurrency:
       - main
       - release-*
 
+
 env:
   PLATFORM: linux/arm64
   INSTALLER_ARCH: targetarch
