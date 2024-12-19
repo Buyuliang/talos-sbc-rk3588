@@ -40,6 +40,8 @@ func ChipsetName(o rk3588ExtraOpts) string {
 		return "rk3588s"
 	case "rock-5b":
 		return "rk3588"
+	case "blade3-v101-linux":
+		return "rk3588"
 	}
 	return ""
 }
