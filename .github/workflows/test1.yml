@@ -31,7 +31,7 @@ jobs:
       packages: write
       pull-requests: read
     runs-on:
-      - ubuntu-latest
+      - self-hosted
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
       SBC_RK3588_TAG: ${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
@@ -80,7 +80,7 @@ jobs:
           fetch-depth: 0
 
   boards:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: write
       packages: write
@@ -151,7 +151,7 @@ jobs:
           docker run --rm -t -v ./_out:/out alpine sh -c 'rm -rf /out/*'
 
   release:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [boards]
     permissions:
       contents: write
