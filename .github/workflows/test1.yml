@@ -97,7 +97,7 @@ jobs:
       - name: Build installer image
         if: github.event_name != 'pull_request'
         run: |
-          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
+          docker run --rm -t --platform=linux/arm64 -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
             installer --arch arm64 \
               --base-installer-image="ghcr.io/siderolabs/installer:${{ env.TALOS_VERSION }}" \
               --overlay-name=rk3588 \
@@ -116,7 +116,7 @@ jobs:
       - name: Build flashable image
         run: |
           ls _out
-          docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
+          docker run --rm -t --platform=linux/arm64 -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
           metal --arch arm64 \
             --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588-${{ matrix.kernel }}:${{ env.SBC_RK3588_TAG }} \
             --overlay-name=rk3588 \
