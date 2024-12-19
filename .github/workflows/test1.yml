@@ -111,7 +111,7 @@ jobs:
               --overlay-name=rk3588 \
               --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588-bsp:${{ env.SBC_RK3588_TAG }} \
               --overlay-option="board=${{ matrix.board.name }}" \
-              --overlay-option="chipset=${{ matrix.board.chipset }}" \
+              --overlay-option="chipset=${{ matrix.board.chipset }}"
  
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -130,6 +130,7 @@ jobs:
             --overlay-name=rk3588 \
             --overlay-option="board=${{ matrix.board.name }}" \
             --overlay-option="chipset=${{ matrix.board.chipset }}" \
+            --base-installer-image="ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}-${{ matrix.kernel }}"
     
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
