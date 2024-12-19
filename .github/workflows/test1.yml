@@ -98,6 +98,13 @@ jobs:
       - name: Build installer image
         if: github.event_name != 'pull_request'
         run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu qemu-user-static qemu-system
+          wget https://github.com/google/go-containerregistry/releases/download/v0.19.1/go-containerregistry_Linux_x86_64.tar.gz
+          tar -xvf go-containerregistry_Linux_x86_64.tar.gz
+          sudo chmod a+x crane
+          sudo cp crane /usr/local/bin
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
           docker run --rm -t --platform=linux/arm64 -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
             installer --arch arm64 \
               --base-installer-image="ghcr.io/siderolabs/installer:${{ env.TALOS_VERSION }}" \
