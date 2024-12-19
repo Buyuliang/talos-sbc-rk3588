@@ -116,19 +116,16 @@ jobs:
 
       - name: Build flashable image
         run: |
+          ls _out
           docker run --rm -t -v ./_out:/out -v /dev:/dev --privileged ghcr.io/${{ env.USERNAME }}/imager:${{ env.SBC_RK3588_TAG }}-${{ matrix.kernel }} \
           metal --arch arm64 \
             --overlay-image=ghcr.io/${{ env.USERNAME }}/talos-sbc-rk3588-${{ matrix.kernel }}:${{ env.SBC_RK3588_TAG }} \
             --overlay-name=rk3588 \
             --overlay-option="board=${{ matrix.board.name }}" \
             --overlay-option="chipset=${{ matrix.board.chipset }}" \
-            --base-installer-image="ghcr.io/${{ env.USERNAME }}/talos-rk3588:${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}"
+            --base-installer-image="ghcr.io/${{ env.USERNAME }}/talos-rk3588-${{ matrix.kernel }}:${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-#      - name: Prepare flashable image for upload
-#        run: |
-#          docker run --rm -t -v ./_out:/out alpine mv /out/metal-arm64.raw.xz /out/talos-${{ env.SBC_RK3588_TAG }}-${{ matrix.board.name }}-${{ matrix.kernel }}.raw.xz
 
       - uses: actions/upload-artifact@v4
         with:
