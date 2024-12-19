@@ -48,6 +48,7 @@ jobs:
         continue-on-error: true
       - name: print-system-info
         run: |
+          docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
           MEMORY_GB=$((${{ steps.system-info.outputs.totalmem }}/1024/1024/1024))
 
           OUTPUTS=(
