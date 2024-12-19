@@ -32,7 +32,6 @@ jobs:
       pull-requests: read
     runs-on:
       - ubuntu-latest
-      - pkgs
     if: (!startsWith(github.head_ref, 'renovate/') && !startsWith(github.head_ref, 'dependabot/'))
     outputs:
       SBC_RK3588_TAG: ${{ steps.build-overlay.outputs.SBC_RK3588_TAG }}
