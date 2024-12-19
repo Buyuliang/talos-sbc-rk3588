@@ -18,7 +18,7 @@ concurrency:
 env:
   PLATFORM: linux/arm64
   INSTALLER_ARCH: targetarch
-  USERNAME: ${{ github.repository_owner }}
+  USERNAME: buyuliang
   TALOS_VERSION: v1.7.4
   REALKTEK_FIRMWARE_EXTENSION_IMAGE: ghcr.io/siderolabs/realtek-firmware:20240513@sha256:4ca40c2836c1cdb5105456186afd880925d72e81ee6b0ff69a40c9c05b7b74a4
 
