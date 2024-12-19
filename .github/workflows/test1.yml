@@ -92,7 +92,7 @@ jobs:
           - name: rock-5b
             chipset: rk3588
     env:
-      SBC_RK3588_TAG: v1.0-2-g887279e-bsp
+      SBC_RK3588_TAG: v1.0-2-g887279e
     steps:
       - name: Build installer image
         if: github.event_name != 'pull_request'
