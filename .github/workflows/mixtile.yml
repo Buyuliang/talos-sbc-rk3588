@@ -74,16 +74,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Build RK3588 overlay
-        id: build-overlay
-        run: |
-          docker buildx create --driver docker-container  --driver-opt network=host --name local1 --buildkitd-flags '--allow-insecure-entitlement security.insecure' --use
-          make talos-kernel-rk3588-${{ matrix.kernel }} talos-sbc-rk3588-${{ matrix.kernel }}
-          echo "SBC_RK3588_TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')" >> "$GITHUB_OUTPUT"
       - name: Push RK3588 overlay to registry
         if: github.event_name != 'pull_request'
         run: |
+          docker buildx create --driver docker-container  --driver-opt network=host --name local1 --buildkitd-flags '--allow-insecure-entitlement security.insecure' --use
           make PUSH=true talos-kernel-rk3588-${{ matrix.kernel }} talos-sbc-rk3588-${{ matrix.kernel }}
+          echo "SBC_RK3588_TAG=$(git describe --tag --always --dirty --match 'v[0-9]*')" >> "$GITHUB_OUTPUT"
       - name: Checkout upstream Talos repo
         uses: actions/checkout@v4
         with:
