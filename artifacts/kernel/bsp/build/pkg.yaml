@@ -8,6 +8,7 @@ steps:
       CARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
       ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
       KBUILD_CFLAGS: -Wno-error
+      BUILD_ARG_KERNEL_TARGET: rockchip_linux_defconfig
     prepare:
       - |
         cd /src
