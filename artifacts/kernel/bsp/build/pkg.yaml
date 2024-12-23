@@ -29,7 +29,7 @@ steps:
 
         if [[ "${ARCH}" == "arm64" ]]; then
           echo "Compiling device-tree blobs"
-          make -j $(nproc) dtbs
+          make -j $(nproc) rockchip/rk3588-blade3-v101-linux.dtb
         fi
       {{ end }}
 finalize:
