@@ -1,8 +1,7 @@
 name: u-boot
 variant: scratch
 dependencies:
-  - stage: u-boot-rock-5a
-  - stage: u-boot-rock-5b
+  - stage: u-boot-mixtile
 finalize:
   - from: /rootfs
     to: /rootfs
