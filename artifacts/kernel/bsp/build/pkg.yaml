@@ -8,19 +8,12 @@ steps:
       CARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
       ARCH: {{ if eq .ARCH "aarch64"}}arm64{{ else }}unsupported{{ end }}
       KBUILD_CFLAGS: -Wno-error
-      BUILD_ARG_KERNEL_TARGET: rockchip_linux_defconfig
     prepare:
       - |
         cd /src
         cp -v /pkg/config-${CARCH} .config
         cp -v /pkg/certs/* certs/
     build:
-      {{ if .BUILD_ARG_KERNEL_TARGET }}
-      - |
-        cd /src
-
-        make {{ .BUILD_ARG_KERNEL_TARGET }}
-      {{ else }}
       - |
         cd /src
 
@@ -31,7 +24,6 @@ steps:
           echo "Compiling device-tree blobs"
           make -j $(nproc) rockchip/rk3588-blade3-v101-linux.dtb
         fi
-      {{ end }}
 finalize:
   {{ if .BUILD_ARG_KERNEL_TARGET }}
   - from: /src/.config
